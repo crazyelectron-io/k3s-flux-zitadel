@@ -1,0 +1,53 @@
+---
+# yaml-language-server: $schema=https://raw.githubusercontent.com/fluxcd-community/flux2-schemas/main/helmrelease-helm-v2.json
+apiVersion: helm.toolkit.fluxcd.io/v2
+kind: HelmRelease
+metadata:
+  name: &app zitadel
+spec:
+  interval: 10m
+  chart:
+    spec:
+      chart: *app
+      version: 2.67.2
+      sourceRef:
+        kind: HelmRepository
+        name: zitadel-charts
+        namespace: flux-system
+      interval: 15m
+  install:
+    createNamespace: true
+    remediation:
+      retries: 5
+  upgrade:
+    remediation:
+      retries: 5
+  values:
+    zitadel:
+      masterkey: e9bK6OrkNO0BM8aM3HI5ZG0pDpVUlVCY
+      configmapConfig:
+        ExternalSecure: false
+        ExternalDomain: 127.0.0.1.sslip.io
+        TLS:
+          Enabled: false
+        Database:
+          Postgres:
+            Host: zitadel-cluster-rw.authentication-system.svc.cluster.local
+            Port: 5432
+            Database: zitadel_db
+            MaxOpenConns: 20
+            MaxIdleConns: 10
+            MaxConnLifetime: 30m
+            MaxConnIdleTime: 5m
+            User:
+              Username: ${SECRET_ZITADEL_PG_USER}
+              SSL:
+                Mode: disable
+            Admin:
+              Username: postgres
+              SSL:
+                Mode: disable
+    metrics:
+      enabled: true
+      serviceMonitor:
+        enabled: true

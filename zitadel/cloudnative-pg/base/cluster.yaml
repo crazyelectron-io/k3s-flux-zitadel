@@ -1,0 +1,27 @@
+---
+apiVersion: postgresql.cnpg.io/v1
+kind: Cluster
+metadata:
+  name: zitadel-cluster
+spec:
+  description: "PostgreSQL Zitadel DB"
+  imageName: ${SECRET_HARBOR_URL}/postgresql:16.4
+  instances: 2
+  bootstrap:
+    initdb:
+      database: zitadel_db
+      owner: ${SECRET_ZITADEL_PG_USER}
+      secret:
+        name: zitadel-cnpg-user-secret
+  storage:
+    storageClass: longhorn
+    size: 1Gi
+  resources:
+    requests:
+      memory: 200Mi
+      cpu: 200m
+    limits:
+      memory: 1Gi
+      cpu: 1
+  # monitoring:
+  #   enablePodMonitor: true
